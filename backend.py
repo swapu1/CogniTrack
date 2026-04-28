@@ -1,39 +1,52 @@
 import os
-import sys
 import json
 import librosa
-import numpy as np
 import spacy
 import whisper
 from fastapi import FastAPI, UploadFile, File
 
+# DLL Fix for Windows
+try:
+    os.add_dll_directory(os.getcwd())
+except Exception:
+    pass
+
 app = FastAPI()
 
-# Since DLLs are now in the same folder, we just need to tell Python to look "here"
-os.add_dll_directory(os.getcwd())
-
-print("🤖 Loading AI models... this will take a moment.")
+print("🤖 Clinical AI Engine Loading...")
+# 'base' is the best balance of speed and accuracy for your PC
 whisper_model = whisper.load_model("base")
 nlp = spacy.load("en_core_web_sm")
 HISTORY_FILE = "score_history.json"
 
 def analyze_speech(audio_path):
     try:
-        # 1. Transcription
+        # 1. AI Transcription (Handled with Tokenizer stability)
         result = whisper_model.transcribe(audio_path)
-        text = result.get('text', "No speech detected.")
+        text = result.get('text', "")
         
-        # 2. Audio Loading
-        y, sr = librosa.load(audio_path, duration=60)
-        intervals = librosa.effects.split(y, top_db=25) 
-        pause_count = max(0, len(intervals) - 1)
+        # 2. Linguistic Processing
+        doc = nlp(text)
+        words = [token.text.lower() for token in doc if not token.is_punct]
+        sentences = list(doc.sents)
         
-        # 3. Score Calculation
-        # Start at 100, subtract for pauses
-        score = 100 - (pause_count * 3)
-        final_score = min(max(score, 10), 100)
+        # MLU (Complexity) & Fillers (Stalling)
+        mlu = len(words) / max(1, len(sentences))
+        fillers = ["um", "uh", "ah", "er", "hm", "like"]
+        filler_count = sum(1 for word in words if word in fillers)
         
-        # 4. History Tracking
+        # 3. Audio Timing (Pace)
+        duration = librosa.get_duration(path=audio_path)
+        wpm = (len(words) / (duration / 60)) if duration > 0 else 0
+        
+        # 4. Scoring Formula (100 - clinical penalties)
+        score = 100.0
+        if wpm < 115: score -= (115 - wpm) * 0.4
+        if mlu < 7: score -= (7 - mlu) * 2.5
+        score -= (filler_count * 1.5)
+        final_score = min(max(round(score, 1), 10), 100)
+
+        # 5. Save Score to History
         history = []
         if os.path.exists(HISTORY_FILE):
             with open(HISTORY_FILE, "r") as f:
@@ -42,12 +55,14 @@ def analyze_speech(audio_path):
         history.append(float(final_score))
         with open(HISTORY_FILE, "w") as f:
             json.dump(history[-10:], f)
-            
-        return {"text": text, "score": final_score, "history": history}
-        
+
+        return {
+            "text": text,
+            "score": final_score,
+            "metrics": {"wpm": round(wpm), "mlu": round(mlu, 1), "fillers": filler_count},
+            "history": history
+        }
     except Exception as e:
-        # If it hits this, it prints the REAL error in your black CMD window
-        print(f"❌ Actual Error: {e}")
         return {"error": str(e), "score": 0, "history": []}
 
 @app.post("/process")
