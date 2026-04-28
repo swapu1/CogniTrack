@@ -25,10 +25,14 @@ st.markdown("""
     .stTabs [data-baseweb="tab-list"] { gap: 24px; }
     .stTabs [data-baseweb="tab"] { height: 50px; font-weight: 600; }
     
-    /* Coming Soon Badge */
     .coming-soon {
         background-color: #1f6feb; color: white; padding: 4px 8px; 
         border-radius: 5px; font-size: 0.8rem; font-weight: bold; margin-left: 10px;
+    }
+    
+    .disease-card {
+        background-color: #1c2128; border: 1px solid #30363d; 
+        padding: 15px; border-radius: 10px; margin-bottom: 15px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -53,7 +57,7 @@ history, tasks = load_all_data()
 if 'current_task' not in st.session_state:
     st.session_state.current_task = random.choice(tasks)
 
-# 4. SIDEBAR: INFINITE WEEKLY TRACKER
+# 4. SIDEBAR
 with st.sidebar:
     st.markdown('<div style="text-align: center; margin-top: 20px;">', unsafe_allow_html=True)
     st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=90) 
@@ -81,10 +85,97 @@ with st.sidebar:
 # 5. MAIN INTERFACE
 st.title("🧠 CogniTrack: Clinical Assessment")
 
-# --- I ADDED THE THIRD TAB HERE ---
-tab1, tab2, tab3 = st.tabs(["🚀 Current Assessment", "📈 Progress Graph", "🧬 Biometrics (Beta)"])
+tab1, tab2, tab3, tab4 = st.tabs(["📖 Introduction", "🚀 Current Assessment", "📈 Progress Graph", "🧬 Biometrics (Beta)"])
 
+# --- UPDATED INTRODUCTION TAB ---
 with tab1:
+    st.markdown("### Welcome to Cognitive Tracking")
+    st.write("Cognitive tracking is a proactive wellness monitor for your brain. By briefly analyzing subtle patterns, pacing, and vocabulary in your speech over time, CogniTrack monitors your cognitive vitality and detects early shifts long before they become noticeable.")
+    
+    col_stats, col_img = st.columns([1.5, 1], gap="large")
+    
+    with col_stats:
+        st.markdown("#### 📊 Quick Global Statistics")
+        st.markdown("""
+        * **55 Million:** People living with significant cognitive decline globally.
+        * **1 in 3 Seconds:** A new case is identified worldwide.
+        * **75% Undiagnosed:** Most early-stage shifts go unnoticed without active tracking.
+        * **Not Just Aging:** While age is a risk factor, severe cognitive decline is not a normal part of getting older.
+        """)
+        
+    with col_img:
+        try:
+            st.image("intro_brain.png", use_container_width=True, caption="Longitudinal tracking detects subtle drifts.")
+        except:
+            st.info("🖼️ [Place 'intro_brain.png' in the directory]")
+
+    st.divider()
+    
+    # Diseases Section
+    st.markdown("### 🧠 Common Types of Cognitive Decline")
+    st.write("Dementia is an umbrella term for conditions causing severe cognitive decline. Here are the most common specific conditions:")
+    
+    d1, d2 = st.columns(2, gap="large")
+    
+    with d1:
+        st.markdown("""
+        <div class="disease-card">
+            <h4 style="color: #58a6ff;">1. Alzheimer's Disease (60-70%)</h4>
+            <p>Caused by abnormal protein build-up (amyloid plaques and tau tangles) in the brain. It typically starts in the hippocampus, primarily affecting learning and short-term memory first.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        try:
+            st.image("alzheimers_brain.png", use_container_width=True) # PLACEHOLDER IMAGE
+        except:
+            st.caption("[Add 'alzheimers_brain.png' here]")
+
+        st.markdown("""
+        <div class="disease-card">
+            <h4 style="color: #58a6ff;">3. Lewy Body Dementia (5-10%)</h4>
+            <p>Abnormal balloon-like clumps of protein develop inside nerve cells. Early signs include severe fluctuations in alertness, visual hallucinations, and Parkinson-like movement issues.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        try:
+            st.image("lewy_body_brain.png", use_container_width=True) # PLACEHOLDER IMAGE
+        except:
+            st.caption("[Add 'lewy_body_brain.png' here]")
+
+    with d2:
+        st.markdown("""
+        <div class="disease-card">
+            <h4 style="color: #58a6ff;">2. Vascular Dementia (20%)</h4>
+            <p>Occurs due to restricted blood flow to the brain, often linked to strokes, high blood pressure, or diabetes. It primarily impacts judgment, planning, and causes slowed thinking.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        try:
+            st.image("vascular_brain.png", use_container_width=True) # PLACEHOLDER IMAGE
+        except:
+            st.caption("[Add 'vascular_brain.png' here]")
+
+        st.markdown("""
+        <div class="disease-card">
+            <h4 style="color: #58a6ff;">4. Frontotemporal Dementia (FTD)</h4>
+            <p>A leading cause of early-onset decline. It involves progressive nerve loss in the frontal and temporal lobes, causing drastic changes in personality, empathy, or language abilities.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        try:
+            st.image("ftd_brain.png", use_container_width=True) # PLACEHOLDER IMAGE
+        except:
+            st.caption("[Add 'ftd_brain.png' here]")
+
+    st.divider()
+    
+    st.markdown("### 🛡️ Prevention & Quality of Life")
+    st.write("The brain is highly adaptable. You can actively build cognitive reserve and improve your quality of life through daily habits:")
+    st.markdown("""
+    * 🏃 **Stay Active:** Regular physical exercise increases blood flow and oxygen to the brain.
+    * 🗣️ **Stay Social:** Engaging in daily conversations builds strong neural pathways.
+    * 💤 **Rest Well:** 7-8 hours of quality sleep helps the brain clear out daily toxins.
+    * 🥗 **Eat Smart:** Diets rich in Omega-3s and antioxidants support long-term mental clarity.
+    """)
+
+# --- ASSESSMENT TAB ---
+with tab2:
     col_left, col_right = st.columns([1, 1], gap="large")
 
     with col_left:
@@ -141,20 +232,21 @@ with tab1:
                     else:
                         st.error(f"Backend Server Error: {res.status_code}")
                 except requests.exceptions.ConnectionError:
-                    st.error("Backend Not Running! Start 'backend(1).py' in your command prompt.")
+                    st.error("Backend Not Running! Start 'backend.py' in your command prompt.")
 
-with tab2:
+# --- PROGRESS GRAPH TAB ---
+
+with tab3:
     st.subheader("📈 Long-term Cognitive Stability")
     if len(history) > 0:
         st.line_chart(history)
         st.caption(f"Historical Trend for **Swapnil S.**")
     else:
         st.info("No data points available yet. Complete Week 1 to generate the graph.")
-
-# --- HERE IS YOUR NEW HARDWARE MENU ---
-with tab3:
-    st.markdown('<h3>🧬 Real-Time Physiological Tracking <span class="coming-soon">COMING SOON</span></h3>', unsafe_allow_html=True)
-    st.write("This module will integrate with external hardware to track physical stress and effort during cognitive load.")
+# --- BIOMETRICS TAB (Beta) ---
+with tab4:
+    st.markdown('<h3>🧬 Real-Time Physiological Tracking <span class="coming-soon">BETA TEST</span></h3>', unsafe_allow_html=True)
+    st.write("This module integrates with external hardware to track physical stress and effort during cognitive load.")
     
     st.divider()
     
