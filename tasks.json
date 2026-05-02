@@ -1,0 +1,12 @@
+[
+    {"name": "The Cookie Theft", "image_file": "cookie_theft.png", "description": "A busy kitchen scene with children and a mother."},
+    {"name": "The Picnic Scene", "image_file": "picnic.png", "description": "A family enjoying a meal outdoors by a lake."},
+    {"name": "The Circus Performance", "image_file": "circus.png", "description": "Multiple performers and animals in a circus ring."},
+    {"name": "The Public Park", "image_file": "park.png", "description": "People walking dogs and playing in a sunny park."},
+    {"name": "The Grocery Store", "image_file": "grocery.png", "description": "A shopper navigating aisles and checking a list."},
+    {"name": "The Busy Street", "image_file": "street.png", "description": "Traffic, pedestrians, and shops in a city center."},
+    {"name": "The Library Reading Room", "image_file": "library.png", "description": "People studying and browsing books quietly."},
+    {"name": "The Garden Party", "image_file": "garden.png", "description": "Guests talking and eating in a backyard garden."},
+    {"name": "The Beach Day", "image_file": "beach.png", "description": "Swimmers, sunbathers, and a lifeguard tower."},
+    {"name": "The Classroom", "image_file": "classroom.png", "description": "A teacher explaining a lesson to attentive students."}
+]
